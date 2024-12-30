@@ -1,0 +1,33 @@
+# Base namespace definition for SaaS Metrics Platform
+# Version: v1
+# Purpose: Establishes resource isolation and name scoping for the platform components
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: saas-metrics-platform
+  labels:
+    # Core identification labels
+    app: saas-metrics-platform
+    managed-by: kustomize
+    environment: base
+    component: platform
+    tier: application
+    security-level: standard
+    monitoring: enabled
+  annotations:
+    # Namespace documentation and configuration
+    description: "SaaS Metrics Platform namespace for resource isolation"
+    environment: "base"
+    owner: "platform-team"
+    # Security configurations
+    security.kubernetes.io/enforce-pod-security: "restricted"
+    # Monitoring and backup configurations
+    monitoring.kubernetes.io/scrape: "true"
+    backup.kubernetes.io/enabled: "true"
+    # Resource management annotations
+    quota.kubernetes.io/cpu-limit: "16"
+    quota.kubernetes.io/memory-limit: "32Gi"
+    quota.kubernetes.io/storage-limit: "100Gi"
+    # Network policy annotations
+    network-policy.kubernetes.io/default-deny: "true"
+    network-policy.kubernetes.io/allow-monitoring: "true"
