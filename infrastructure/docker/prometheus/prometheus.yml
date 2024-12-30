@@ -1,0 +1,83 @@
+# Prometheus Configuration v2.45.0
+# Global configuration for Prometheus server
+global:
+  # Default scrape interval for all targets
+  scrape_interval: 15s
+  # Default evaluation interval for rules
+  evaluation_interval: 15s
+  # External labels added to any time series or alerts
+  external_labels:
+    monitor: saas-metrics-platform
+    environment: ${ENV:-production}
+    region: ${REGION:-us-east-1}
+
+# Rule files to load for recording rules and alerting rules
+rule_files:
+  - rules/recording_rules.yml
+  - rules/alerting_rules.yml
+  - rules/slo_rules.yml
+
+# Scrape configurations for monitoring targets
+scrape_configs:
+  # Self-monitoring of Prometheus server
+  - job_name: prometheus
+    honor_labels: true
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: monitoring
+
+  # API Server monitoring with high-frequency scraping
+  - job_name: api-server
+    metrics_path: /metrics
+    scrape_interval: 10s  # More frequent scraping for critical service
+    scrape_timeout: 8s
+    static_configs:
+      - targets: ['api:3000']
+        labels:
+          service: api
+          component: backend
+    metric_relabel_configs:
+      # Keep only HTTP request duration metrics for SLA monitoring
+      - source_labels: ['__name__']
+        regex: 'http_request_duration_seconds.*'
+        action: keep
+
+  # Web Server monitoring
+  - job_name: web-server
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 8s
+    static_configs:
+      - targets: ['web:5173']
+        labels:
+          service: web
+          component: frontend
+
+  # PostgreSQL database monitoring
+  - job_name: postgresql
+    metrics_path: /metrics
+    scrape_interval: 30s  # Less frequent for database metrics
+    static_configs:
+      - targets: ['postgresql-exporter:9187']
+        labels:
+          service: database
+          component: storage
+
+  # Redis cache monitoring
+  - job_name: redis
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: cache
+          component: storage
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+      timeout: 5s
+      api_version: v2
