@@ -1,0 +1,48 @@
+# HorizontalPodAutoscaler patch for staging environment
+# Version: autoscaling/v2
+# Purpose: Customizes base HPA configuration with staging-specific autoscaling settings
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: saas-metrics-platform  # Must match base HPA name
+  namespace: saas-metrics-staging  # Staging environment isolation
+spec:
+  # High availability configuration for staging
+  minReplicas: 2  # Minimum 2 replicas to ensure availability
+  maxReplicas: 5  # Maximum 5 replicas for staging capacity control
+  
+  # Resource utilization targets
+  metrics:
+    # CPU-based scaling
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70  # Aggressive CPU target for proactive scaling
+    
+    # Memory-based scaling
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75  # Balanced memory target for staging workloads
+  
+  # Scaling behavior configuration
+  behavior:
+    # Scale-up behavior
+    scaleUp:
+      stabilizationWindowSeconds: 30  # Quick 30s window for rapid response
+      policies:
+        - type: Pods
+          value: 1  # Add 1 pod at a time
+          periodSeconds: 30  # Every 30 seconds
+    
+    # Scale-down behavior
+    scaleDown:
+      stabilizationWindowSeconds: 180  # Conservative 180s window to prevent thrashing
+      policies:
+        - type: Pods
+          value: 1  # Remove 1 pod at a time
+          periodSeconds: 180  # Every 180 seconds
