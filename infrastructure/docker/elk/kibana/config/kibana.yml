@@ -1,0 +1,117 @@
+# Kibana v7.17.0 Configuration
+# Purpose: Core configuration for SaaS Metrics Platform's ELK stack
+
+#-------------------------- Server Configuration --------------------------
+# Server identification and network settings
+server.name: "saas-metrics-kibana"
+server.host: "0.0.0.0"
+server.port: 5601
+server.maxPayloadBytes: 10485760
+
+# SSL/TLS Configuration
+server.ssl.enabled: true
+server.ssl.certificate: "/etc/kibana/certs/kibana.crt"
+server.ssl.key: "/etc/kibana/certs/kibana.key"
+
+#-------------------------- Elasticsearch Configuration --------------------------
+# Connection settings for Elasticsearch cluster
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+elasticsearch.requestTimeout: 30000
+elasticsearch.shardTimeout: 30000
+elasticsearch.ssl.verificationMode: "certificate"
+elasticsearch.ssl.certificateAuthorities: ["/etc/kibana/certs/ca.crt"]
+
+#-------------------------- Security Configuration --------------------------
+# X-Pack security settings
+xpack.security.enabled: true
+xpack.security.encryptionKey: "${KIBANA_ENCRYPTION_KEY}"
+xpack.security.audit.enabled: true
+xpack.security.audit.ignore_filters:
+  - actions: ["access:login"]
+    categories: ["authentication"]
+
+# Session management
+xpack.security.session.idleTimeout: "1h"
+xpack.security.session.lifespan: "24h"
+
+#-------------------------- Monitoring Configuration --------------------------
+# X-Pack monitoring settings
+xpack.monitoring.enabled: true
+xpack.monitoring.ui.container.elasticsearch.enabled: true
+xpack.monitoring.collection.enabled: true
+xpack.monitoring.collection.interval: "10s"
+
+# Performance monitoring thresholds
+xpack.monitoring.max_bucket_size: 10000
+xpack.monitoring.min_interval_seconds: 10
+
+#-------------------------- Logging Configuration --------------------------
+# Logging settings with rotation
+logging.dest: "/var/log/kibana/kibana.log"
+logging.json: true
+logging.rotate.enabled: true
+logging.rotate.size: "100mb"
+logging.rotate.keepFiles: 7
+logging.timezone: "UTC"
+
+# Logging levels
+logging.root.level: "info"
+logging.appenders.default:
+  type: "file"
+  layout:
+    type: "json"
+    additionalFields:
+      env: "production"
+      service: "kibana"
+
+#-------------------------- Performance Configuration --------------------------
+# Cache settings
+optimize.useBundleCache: true
+optimize.bundleFilter: "!tests"
+optimize.watchPort: 5602
+
+# Query settings
+kibana.autocompleteTimeout: "1000ms"
+kibana.autocompleteTerminateAfter: 100000
+
+#-------------------------- Feature Controls --------------------------
+# Disabled features for security
+telemetry.enabled: false
+telemetry.allowChangingOptInStatus: false
+console.enabled: false
+
+# Enabled features
+xpack.reporting.enabled: true
+xpack.reporting.capture.timeouts.waitForElements: 5000
+xpack.reporting.csv.maxSizeBytes: 10485760
+
+#-------------------------- CORS and Security Headers --------------------------
+# CORS settings
+server.cors.enabled: true
+server.cors.allowCredentials: false
+server.cors.allowOrigin: ["https://*.saasmetrics.com"]
+
+# Security headers
+server.customResponseHeaders:
+  X-Content-Type-Options: "nosniff"
+  X-Frame-Options: "SAMEORIGIN"
+  X-XSS-Protection: "1; mode=block"
+  Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+
+#-------------------------- Advanced Settings --------------------------
+# Node.js heap settings
+node.options:
+  - "--max-old-space-size=2048"
+
+# Compression settings
+server.compression.enabled: true
+server.compression.referrerWhitelist: ["https://*.saasmetrics.com"]
+
+# Request size limits
+server.maxPayloadBytes: 10485760
+server.keepaliveTimeout: 120000
+
+#-------------------------- Development Settings --------------------------
+# Disabled in production
+dev.basePathProxyTarget: null
+status.allowAnonymous: false
