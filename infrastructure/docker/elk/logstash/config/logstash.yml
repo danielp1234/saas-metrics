@@ -1,0 +1,86 @@
+# Logstash Core Configuration
+# Version: 7.17.0
+# Purpose: Production configuration for SaaS Metrics Platform log processing
+
+# Node Settings
+node.name: "saas-metrics-logstash"
+path.data: /var/lib/logstash
+
+# Pipeline Configuration
+pipeline.id: main
+pipeline.workers: ${PIPELINE_WORKERS}
+pipeline.batch.size: ${PIPELINE_BATCH_SIZE}
+pipeline.batch.delay: ${PIPELINE_BATCH_DELAY}
+pipeline.ordered: true
+pipeline.unsafe_shutdown: false
+
+# Queue Settings
+queue.type: ${QUEUE_TYPE}
+queue.max_bytes: ${QUEUE_MAX_BYTES}
+queue.checkpoint.writes: 1024
+queue.checkpoint.acks: true
+queue.drain: true
+
+# Memory Management
+path.logs: /var/log/logstash
+path.config: /usr/share/logstash/pipeline
+config.reload.automatic: true
+config.reload.interval: 3s
+config.support_escapes: true
+
+# JVM Settings
+jvm.heap.initial: ${JVM_HEAP_SIZE}
+jvm.heap.max: ${JVM_HEAP_SIZE}
+jvm.custom_options: "-XX:+UseG1GC -XX:G1ReservePercent=20"
+
+# HTTP API Settings
+api.enabled: true
+api.http.host: "0.0.0.0"
+api.http.port: 9600
+api.environment: production
+
+# Monitoring Configuration
+monitoring.enabled: true
+monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
+monitoring.elasticsearch.username: logstash_system
+monitoring.elasticsearch.password: ${MONITORING_PASSWORD}
+monitoring.collection.interval: ${MONITORING_INTERVAL}
+monitoring.elasticsearch.ssl.verification_mode: certificate
+monitoring.cluster.uuid: "logstash-monitoring-${node.name}"
+
+# X-Pack Monitoring
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.username: logstash_system
+xpack.monitoring.elasticsearch.password: ${MONITORING_PASSWORD}
+xpack.monitoring.collection.interval: ${MONITORING_INTERVAL}
+
+# Logging Configuration
+log.level: info
+log.format: json
+log.timezone: UTC
+
+# Performance Tuning
+pipeline.ecs_compatibility: v1
+pipeline.plugin.classloaders: false
+config.debug: false
+path.plugins: /usr/share/logstash/plugins
+
+# Dead Letter Queue
+dead_letter_queue.enable: true
+dead_letter_queue.max_bytes: 1gb
+path.dead_letter_queue: /var/lib/logstash/dead_letter_queue
+
+# Persistent Queue Settings
+queue.page_capacity: 64mb
+queue.max_events: 0
+queue.drain: true
+
+# Metrics Settings
+metrics.enabled: true
+metrics.collection.interval: 10
+metrics.collectors: ["jvm", "process", "pipeline"]
+
+# Security Settings
+path.settings: /usr/share/logstash/config
+ssl.enabled: true
+ssl.verification_mode: certificate
