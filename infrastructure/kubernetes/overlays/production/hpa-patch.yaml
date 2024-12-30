@@ -1,0 +1,56 @@
+# Production HPA patch for SaaS Metrics Platform
+# Kubernetes autoscaling/v2 API version
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  # Must match base HPA name for proper patching
+  name: saas-metrics-platform
+  # Production namespace
+  namespace: saas-metrics-prod
+spec:
+  # Increased minimum replicas for high availability in production
+  minReplicas: 5
+  # Higher maximum replicas to handle production load spikes
+  maxReplicas: 20
+  
+  # Resource-based scaling metrics
+  metrics:
+    # CPU-based scaling
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          # Aggressive CPU scaling threshold to maintain performance
+          averageUtilization: 70
+    
+    # Memory-based scaling
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          # Aggressive memory scaling threshold with safety margin
+          averageUtilization: 75
+  
+  # Fine-tuned scaling behavior
+  behavior:
+    # Rapid scale up configuration
+    scaleUp:
+      # Quick reaction to load increases
+      stabilizationWindowSeconds: 30
+      policies:
+        # Allow adding up to 4 pods every 60 seconds
+        - type: Pods
+          value: 4
+          periodSeconds: 60
+    
+    # Conservative scale down configuration
+    scaleDown:
+      # Long window to prevent premature scale down
+      stabilizationWindowSeconds: 600
+      policies:
+        # Remove at most 1 pod every 10 minutes
+        - type: Pods
+          value: 1
+          periodSeconds: 600
