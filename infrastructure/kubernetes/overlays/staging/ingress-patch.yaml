@@ -1,0 +1,55 @@
+# Kubernetes Ingress patch for staging environment
+# Version: networking.k8s.io/v1 (Kubernetes v1.24+)
+# Purpose: Customizes base ingress with staging-specific configuration
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: saas-metrics-ingress  # Must match base ingress name
+  namespace: saas-metrics-staging
+  annotations:
+    # SSL/TLS Configuration
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+    nginx.ingress.kubernetes.io/ssl-ciphers: "HIGH:!aNULL:!MD5"
+    
+    # Security Headers
+    nginx.ingress.kubernetes.io/security-headers: "true"
+    
+    # CORS Configuration
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://staging.metrics.saas-platform.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    
+    # Performance Optimization
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+
+spec:
+  tls:
+    - hosts:
+        - staging.metrics.saas-platform.com
+      secretName: saas-metrics-staging-tls
+  rules:
+    - host: staging.metrics.saas-platform.com
+      http:
+        paths:
+          # API Service Route
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: saas-metrics-service
+                port:
+                  number: 80
+          # Web Frontend Route
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: saas-metrics-web
+                port:
+                  number: 80
