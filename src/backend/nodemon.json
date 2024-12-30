@@ -1,0 +1,26 @@
+{
+  "watch": [
+    "src/**/*.ts",
+    "src/**/*.json"
+  ],
+  "ignore": [
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "tests/**/*",
+    "node_modules/**/*",
+    "dist/**/*"
+  ],
+  "ext": ".ts,.js,.json",
+  "exec": "ts-node -r tsconfig-paths/register src/server.ts",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "verbose": true,
+  "restartable": "rs",
+  "delay": 1000,
+  "events": {
+    "start": "echo 'Starting SaaS Metrics Platform server...'",
+    "restart": "echo 'Restarting SaaS Metrics Platform server...'",
+    "crash": "echo 'Server crashed - waiting for changes before restart'"
+  }
+}
