@@ -4,103 +4,119 @@ Based on the technical specification and code analysis, I'll now generate the Pr
 # Project Guide
 
 # PROJECT OVERVIEW
-The SaaS Metrics Benchmarking Platform is a comprehensive web-based solution designed to provide benchmark data for key performance indicators across different revenue ranges and data sources. The platform enables SaaS companies to evaluate their performance against industry standards through accurate, real-time comparative analytics. Built with React, TypeScript, and Node.js, it features interactive data visualization, statistical distribution analysis, and secure administrative capabilities.
+The SaaS Metrics Benchmarking Platform is a comprehensive web application designed to provide real-time comparative analytics for SaaS companies. It enables executives, financial analysts, and investors to evaluate performance against industry standards through 14 key metrics, percentile distributions, and interactive filtering capabilities. The platform features a React-based frontend with Material-UI, Express.js backend services, PostgreSQL database, and Redis caching, all deployed on Replit infrastructure with robust security measures including Google OAuth integration.
 
 # PROJECT STATUS
-
 ```mermaid
 pie title Project Completion Status
-    "Completed (95%)" : 95
-    "Remaining (5%)" : 5
+    "Completed (90%)" : 900
+    "Remaining (10%)" : 100
 ```
-
-- Estimated engineering hours: 2,400 hours
-- Hours completed by Blitzy: 2,280 hours
-- Hours remaining: 120 hours
+- Estimated engineering hours: 1000
+- Hours completed by Blitzy: 900
+- Hours remaining: 100
 
 # CODE GUIDE
 
-## /src/backend
-Backend implementation using Node.js and Express.js
-
-### Core Files
-- `app.ts`: Main Express application configuration with security middleware
-- `server.ts`: Server initialization and port configuration
-- `config/`: Configuration files for different environments
-- `lib/`: Core utilities (database, logging, metrics, etc.)
-
-### API Layer
-- `api/routes/`: Route definitions for all endpoints
-- `api/controllers/`: Request handlers and business logic
-- `api/middleware/`: Custom middleware (auth, validation, etc.)
-- `api/validators/`: Request validation schemas
-
-### Data Layer
-- `models/`: Database models and schemas
-- `services/`: Business logic implementation
-- `db/migrations/`: Database migration files
-- `db/seeds/`: Seed data for development
-
-### Workers
-- `workers/`: Background job processors
-- `services/import.service.ts`: Data import handling
-
 ## /src/web
-Frontend implementation using React and TypeScript
+Frontend React application with TypeScript
 
-### Core Files
-- `App.tsx`: Main application component with routing
-- `main.tsx`: Application entry point
-- `store/`: Redux store configuration
-- `config/`: Frontend configuration files
+### /src/web/src
+- **App.tsx**: Root application component handling routing, authentication, and theme providers
+- **main.tsx**: Application entry point with Redux store and root render
+- **vite-env.d.ts**: TypeScript declarations for Vite environment
 
-### Components
-- `components/common/`: Reusable UI components
-- `components/layout/`: Page layout components
-- `components/metrics/`: Metric-specific components
-- `components/filters/`: Filter components
-- `components/charts/`: Data visualization components
+### /src/web/src/components
+- **/charts**: Chart components for metric visualization (PercentileChart, DistributionChart, LineChart)
+- **/common**: Reusable UI components (Button, Card, Dropdown, LoadingSpinner, etc.)
+- **/filters**: Filter components for metrics (ARRFilter, MetricFilter, SourceFilter)
+- **/layout**: Layout components (Header, Footer, Sidebar, AdminLayout, MainLayout)
+- **/metrics**: Metric-specific components (MetricCard, MetricDetail, MetricGrid)
 
-### Features
-- `pages/`: Page components for different routes
-- `hooks/`: Custom React hooks
-- `services/`: API service integrations
-- `utils/`: Utility functions
+### /src/web/src/pages
+- **/admin**: Admin dashboard pages (Dashboard, DataImport, DataSources, Settings)
+- **/metrics**: Metric pages (List, Detail)
+- **/auth**: Authentication pages (Login, Logout)
+- **/error**: Error pages (404, 500)
 
-### Assets
-- `assets/styles/`: Global styles and theme
-- `assets/images/`: Image assets
-- `assets/fonts/`: Font files
+### /src/web/src/store
+- **/actions**: Redux actions for metrics, auth, and UI state
+- **/reducers**: Redux reducers with proper TypeScript typing
+- **/selectors**: Memoized selectors for state access
+- **store.ts**: Redux store configuration with middleware
+
+### /src/web/src/services
+- **api.service.ts**: Base API service with axios
+- **auth.service.ts**: Authentication service for Google OAuth
+- **metrics.service.ts**: Metrics data service
+
+## /src/backend
+Backend Express.js application with TypeScript
+
+### /src/backend/src
+- **app.ts**: Express application setup with middleware stack
+- **server.ts**: Server initialization and startup
+- **types**: TypeScript type definitions
+
+### /src/backend/src/api
+- **/controllers**: Request handlers for each route
+- **/middleware**: Security, logging, and validation middleware
+- **/routes**: API route definitions
+- **/validators**: Request validation schemas
+
+### /src/backend/src/services
+- **auth.service.ts**: Authentication and authorization logic
+- **metrics.service.ts**: Metrics processing and calculations
+- **cache.service.ts**: Redis caching implementation
+- **import.service.ts**: Data import processing
+
+### /src/backend/src/db
+- **/migrations**: Database schema migrations
+- **/seeds**: Initial data seeds for metrics and sources
+
+### /src/backend/src/lib
+- **database.ts**: PostgreSQL database connection and pooling
+- **cache.ts**: Redis cache client and operations
+- **logger.ts**: Winston logger configuration
+- **queue.ts**: Bull queue for background jobs
+- **metrics.ts**: Metrics calculation utilities
+- **validation.ts**: Data validation utilities
 
 ## /infrastructure
-Infrastructure as Code (IaC) and deployment configurations
+Infrastructure as Code and deployment configurations
 
-### Terraform
-- `terraform/`: Infrastructure definitions
-- `terraform/modules/`: Reusable infrastructure modules
-- `terraform/environments/`: Environment-specific configurations
+### /infrastructure/terraform
+- **/modules**: Reusable Terraform modules for each service
+- **/environments**: Environment-specific configurations
+- **main.tf**: Main Terraform configuration
+- **variables.tf**: Variable definitions
 
-### Kubernetes
-- `kubernetes/base/`: Base Kubernetes configurations
-- `kubernetes/overlays/`: Environment-specific overlays
+### /infrastructure/kubernetes
+- **/base**: Base Kubernetes manifests
+- **/overlays**: Environment-specific Kustomize overlays
 
-### Docker
-- `docker/`: Docker configurations
-- `docker/elk/`: ELK stack configuration
-- `docker/grafana/`: Monitoring configuration
+### /infrastructure/docker
+- **/elk**: ELK stack configuration
+- **/grafana**: Grafana dashboards and datasources
+- **/prometheus**: Prometheus configuration
 
 # HUMAN INPUTS NEEDED
 
-| Task | Description | Priority | Estimated Hours |
-|------|-------------|----------|-----------------|
-| Environment Variables | Configure production environment variables and secrets | High | 4 |
-| Google OAuth | Set up Google OAuth credentials and configure authentication flow | High | 8 |
-| Database Setup | Initialize production database and run migrations | High | 6 |
-| Redis Configuration | Configure Redis cluster and optimize cache settings | Medium | 8 |
-| SSL Certificates | Generate and configure SSL certificates for production domains | High | 4 |
-| API Keys | Generate and configure third-party service API keys | Medium | 4 |
-| Monitoring Setup | Configure DataDog monitoring and set up alerts | Medium | 16 |
-| Load Testing | Perform load testing and optimize performance | Medium | 24 |
-| Security Audit | Conduct security audit and implement recommendations | High | 24 |
-| Documentation | Complete API documentation and deployment guides | Low | 22 |
+| Task | Description | Priority | Estimated Time |
+|------|-------------|----------|----------------|
+| OAuth Configuration | Set up Google OAuth credentials and configure environment variables | High | 2 hours |
+| Database Setup | Configure PostgreSQL connection, run migrations, and seed initial data | High | 4 hours |
+| Redis Configuration | Set up Redis instance and configure connection parameters | High | 2 hours |
+| API Keys | Generate and configure API keys for third-party services (Sentry, DataDog) | High | 1 hour |
+| Environment Variables | Set up all required environment variables in production | High | 2 hours |
+| SSL Certificates | Configure SSL certificates for secure communication | High | 2 hours |
+| Monitoring Setup | Configure DataDog APM and metrics collection | Medium | 4 hours |
+| Backup Configuration | Set up automated database backups and retention policies | Medium | 3 hours |
+| Cache Policies | Fine-tune Redis cache TTLs and eviction policies | Medium | 2 hours |
+| Rate Limiting | Configure and test rate limiting parameters | Medium | 1 hour |
+| Load Testing | Perform load testing and adjust resource limits | Low | 4 hours |
+| Security Scan | Run security audit and address any findings | High | 4 hours |
+| Documentation | Complete API documentation and deployment guides | Medium | 8 hours |
 ```
+
+This guide provides a comprehensive overview of the project structure, completion status, and remaining tasks needed for production deployment. The code guide section details the purpose and organization of each directory and key files, while the human inputs section outlines specific tasks that need to be completed by the development team.
