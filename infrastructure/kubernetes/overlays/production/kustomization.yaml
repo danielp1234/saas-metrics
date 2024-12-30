@@ -1,0 +1,69 @@
+# kustomize v5.0.0
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Production environment metadata
+metadata:
+  name: saas-metrics-production
+  labels:
+    env: production
+    app: saas-metrics-platform
+    version: 1.0.0
+
+# Production namespace
+namespace: saas-metrics-prod
+
+# Common labels for all resources
+commonLabels:
+  environment: production
+  app: saas-metrics-platform
+  tier: production
+  managed-by: kustomize
+
+# Common annotations for all resources
+commonAnnotations:
+  maintainer: platform-team
+  environment: production
+  contact: platform-team@company.com
+  deployment.kubernetes.io/revision: "1"
+  prometheus.io/scrape: "true"
+  prometheus.io/port: metrics
+
+# Base resources and production-specific resources
+resources:
+  - ../../base
+  - networkpolicy.yaml
+  - resourcequota.yaml
+
+# Production-specific patches
+patchesStrategicMerge:
+  - ingress-patch.yaml  # Production ingress configurations with SSL and security headers
+  - hpa-patch.yaml     # Production HPA settings for optimal scaling
+  - resource-patch.yaml # Production resource quotas and limits
+
+# Production container images
+images:
+  - name: saas-metrics-api
+    newName: registry.company.com/saas-metrics-api
+    newTag: production-v1.0.0
+  - name: saas-metrics-web
+    newName: registry.company.com/saas-metrics-web
+    newTag: production-v1.0.0
+
+# High availability configuration with 5 replicas
+replicas:
+  - name: saas-metrics-platform
+    count: 5
+
+# Production configuration and secrets
+configMapGenerator:
+  - name: saas-metrics-config
+    behavior: merge
+    files:
+      - production-config.yaml
+
+secretGenerator:
+  - name: saas-metrics-secrets
+    type: Opaque
+    files:
+      - production-secrets.env
