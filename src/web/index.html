@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Primary Meta Tags -->
+    <meta name="description" content="SaaS Metrics Benchmarking Platform - Comprehensive benchmark data for key performance indicators across different revenue ranges">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="SaaS Metrics Benchmarking Platform">
+    <meta property="og:description" content="Comprehensive benchmark data for SaaS metrics and KPIs">
+
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; script-src 'self' 'nonce-${nonce}'; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="./src/assets/styles/global.css" as="style">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="./src/assets/styles/global.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="apple-touch-icon" href="./assets/images/logo.svg">
+
+    <title>SaaS Metrics Benchmarking Platform</title>
+
+    <!-- Accessibility -->
+    <script>
+        // Enable skip link functionality
+        window.addEventListener('DOMContentLoaded', () => {
+            const skipLink = document.getElementById('skip-to-main');
+            if (skipLink) {
+                skipLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const main = document.getElementById('root');
+                    if (main) {
+                        main.focus();
+                        main.scrollIntoView();
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#root" id="skip-to-main" class="visually-hidden">Skip to main content</a>
+
+    <!-- Application root with ARIA landmarks -->
+    <div id="root" role="main" aria-label="Application Content" tabindex="-1"></div>
+
+    <!-- Fallback for disabled JavaScript -->
+    <noscript>
+        <div style="padding: 20px; text-align: center;">
+            <h1>JavaScript Required</h1>
+            <p>You need to enable JavaScript to run this application. Please enable JavaScript or switch to a supported browser to continue using this application.</p>
+        </div>
+    </noscript>
+
+    <!-- Application entry point -->
+    <script type="module" src="./src/main.tsx"></script>
+
+    <!-- Error boundary for critical errors -->
+    <div id="error-boundary" aria-live="polite" class="visually-hidden"></div>
+
+    <!-- Loading indicator for screen readers -->
+    <div id="loading-announcer" aria-live="polite" class="visually-hidden"></div>
+</body>
+</html>
