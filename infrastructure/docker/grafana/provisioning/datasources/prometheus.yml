@@ -1,0 +1,33 @@
+# Grafana datasource configuration for Prometheus v9.0.0
+# Configures the Prometheus connection with optimized collection intervals
+# and timeout settings to meet system performance requirements
+
+apiVersion: 1
+
+# Remove any existing Prometheus datasource to ensure clean configuration
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+
+# Configure the Prometheus datasource with optimized settings
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://prometheus:9090
+    basicAuth: false
+    isDefault: true
+    version: 1
+    editable: false
+    jsonData:
+      # Set 15s collection interval to meet high-frequency monitoring requirements
+      # for system performance tracking and early detection of degradation
+      timeInterval: "15s"
+      
+      # Set 30s query timeout to prevent long-running queries from impacting
+      # system performance while maintaining 99.9% uptime target
+      queryTimeout: "30s"
+      
+      # Use POST method for better handling of large queries
+      httpMethod: "POST"
