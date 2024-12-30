@@ -1,0 +1,48 @@
+# Service configuration for SaaS Metrics Platform
+# Version: v1
+# Purpose: Defines internal service exposure with enhanced load balancing and monitoring
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: saas-metrics-service
+  namespace: saas-metrics
+  labels:
+    app: saas-metrics-platform
+    component: api
+    tier: backend
+  annotations:
+    # Enable Prometheus metrics scraping
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3000"
+    prometheus.io/path: "/metrics"
+
+spec:
+  # Use ClusterIP for internal service exposure
+  type: ClusterIP
+  
+  # Port configurations for service exposure
+  ports:
+    # Main application port
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
+    # Metrics port for monitoring
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: metrics
+  
+  # Pod selector configuration
+  selector:
+    app: saas-metrics-platform
+    component: api
+  
+  # Session affinity configuration for consistent routing
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      # 3-hour session stickiness
+      timeoutSeconds: 10800
