@@ -1,0 +1,198 @@
+name: Continuous Deployment
+
+on:
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types: [completed]
+    branches: [main]
+
+env:
+  NODE_VERSION: '18.x'
+  DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  DEPLOYMENT_TIMEOUT: '300'
+  HEALTH_CHECK_RETRIES: '5'
+  VITE_API_URL: ${{ secrets.API_URL }}
+
+jobs:
+  prepare-deployment:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      deployment_id: ${{ steps.create_deployment.outputs.deployment_id }}
+    steps:
+      - name: Create Deployment
+        id: create_deployment
+        run: |
+          DEPLOY_ID=$(date +%s)
+          echo "deployment_id=${DEPLOY_ID}" >> $GITHUB_OUTPUT
+
+  deploy-backend:
+    needs: prepare-deployment
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency: 
+      group: production_backend
+      cancel-in-progress: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
+          buildkitd-flags: --debug
+          
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./src/backend
+          file: ./src/backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/backend:${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/backend:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/backend:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/backend:buildcache,mode=max
+          build-args: |
+            NODE_ENV=production
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ needs.prepare-deployment.outputs.deployment_id }}
+          
+      - name: Deploy to Replit
+        env:
+          REPLIT_TOKEN: ${{ secrets.REPLIT_TOKEN }}
+        run: |
+          echo "Deploying backend service..."
+          # Add Replit deployment commands here
+          
+      - name: Health Check Backend
+        run: |
+          attempts=0
+          max_attempts=${{ env.HEALTH_CHECK_RETRIES }}
+          until curl -s -f "${API_URL}/health" || [ $attempts -eq $max_attempts ]
+          do
+            attempts=$((attempts + 1))
+            echo "Attempt $attempts of $max_attempts"
+            sleep 10
+          done
+          if [ $attempts -eq $max_attempts ]; then
+            echo "Backend health check failed after $max_attempts attempts"
+            exit 1
+          fi
+
+  deploy-frontend:
+    needs: [prepare-deployment, deploy-backend]
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: production_frontend
+      cancel-in-progress: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
+          buildkitd-flags: --debug
+          
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./src/web
+          file: ./src/web/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/frontend:${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/frontend:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/frontend:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/frontend:buildcache,mode=max
+          build-args: |
+            API_URL=${{ secrets.API_URL }}
+            NODE_ENV=production
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ needs.prepare-deployment.outputs.deployment_id }}
+          
+      - name: Deploy to Replit
+        env:
+          REPLIT_TOKEN: ${{ secrets.REPLIT_TOKEN }}
+        run: |
+          echo "Deploying frontend service..."
+          # Add Replit deployment commands here
+          
+      - name: Health Check Frontend
+        run: |
+          attempts=0
+          max_attempts=${{ env.HEALTH_CHECK_RETRIES }}
+          until curl -s -f "${VITE_API_URL}" || [ $attempts -eq $max_attempts ]
+          do
+            attempts=$((attempts + 1))
+            echo "Attempt $attempts of $max_attempts"
+            sleep 10
+          done
+          if [ $attempts -eq $max_attempts ]; then
+            echo "Frontend health check failed after $max_attempts attempts"
+            exit 1
+          fi
+
+  post-deployment:
+    needs: [deploy-backend, deploy-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Deployment Status
+        run: |
+          echo "Deployment completed successfully"
+          echo "Deployment ID: ${{ needs.prepare-deployment.outputs.deployment_id }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          
+      - name: Notify Monitoring Systems
+        if: always()
+        run: |
+          # Add monitoring notification logic here
+          echo "Notifying monitoring systems of deployment status"
+          
+      - name: Verify Deployment
+        run: |
+          # Add comprehensive deployment verification
+          echo "Running post-deployment verification checks"
+
+  rollback:
+    needs: [deploy-backend, deploy-frontend]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initiate Rollback
+        run: |
+          echo "Deployment failed - initiating rollback procedure"
+          # Add rollback logic here
+          
+      - name: Notify Emergency Contacts
+        if: always()
+        run: |
+          echo "Notifying emergency contacts of deployment failure and rollback status"
