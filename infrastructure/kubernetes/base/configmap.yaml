@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: saas-metrics-config
+  namespace: saas-metrics
+  labels:
+    app: saas-metrics-platform
+    component: config
+data:
+  # Server Configuration
+  # Core server settings for the application
+  NODE_ENV: ${ENV}
+  PORT: "3000"
+  HOST: "0.0.0.0"
+
+  # Security Configuration 
+  # CORS and rate limiting settings for API protection
+  CORS_ORIGIN: "https://saas-metrics.replit.app"
+  CORS_METHODS: "GET,POST,PUT,DELETE"
+  CORS_HEADERS: "Content-Type,Authorization"
+  RATE_LIMIT_WINDOW_MS: "60000"  # 1 minute window for rate limiting
+  RATE_LIMIT_MAX_REQUESTS: "100"  # 100 requests per minute for public API
+
+  # Redis Cache Configuration
+  # Optimized cache settings for high performance
+  REDIS_HOST: "saas-metrics-redis"
+  REDIS_PORT: "6379"
+  REDIS_TTL: "900"  # 15 minutes default TTL for cached data
+
+  # Metrics Processing Configuration
+  # Settings for efficient metrics handling and batch processing
+  METRICS_CACHE_TTL: "900"  # 15 minutes cache TTL for metrics data
+  METRICS_UPDATE_INTERVAL: "3600"  # 1 hour interval for metrics updates
+  METRICS_BATCH_SIZE: "1000"  # Process 1000 records per batch for optimal performance
+
+  # System Settings
+  # General system configuration including timeouts and logging
+  API_TIMEOUT: "30000"  # 30 seconds API timeout
+  LOG_LEVEL: "info"  # Default log level for application logs
