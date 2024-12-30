@@ -1,0 +1,109 @@
+# Kubernetes version: v1
+# Purpose: Base deployment configuration for SaaS Metrics Platform microservices
+# Ensures high availability, proper resource allocation, and zero-downtime deployments
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: saas-metrics-platform
+  namespace: saas-metrics
+  labels:
+    app: saas-metrics-platform
+    component: api
+    tier: backend
+  annotations:
+    # Prometheus monitoring configuration
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3000"
+    prometheus.io/path: "/metrics"
+
+spec:
+  # Maintain minimum 3 replicas for high availability (99.9% uptime requirement)
+  replicas: 3
+  
+  # Zero-downtime deployment strategy
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # Maximum number of pods above desired count
+      maxUnavailable: 0  # Never go below desired replica count during updates
+
+  # Pod selector must match template labels
+  selector:
+    matchLabels:
+      app: saas-metrics-platform
+      component: api
+      tier: backend
+
+  template:
+    metadata:
+      labels:
+        app: saas-metrics-platform
+        component: api
+        tier: backend
+    
+    spec:
+      containers:
+      - name: api
+        image: saas-metrics-api:latest
+        imagePullPolicy: Always
+        
+        # Container port configuration
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        
+        # Resource allocation to ensure < 2s response time
+        resources:
+          requests:
+            cpu: 500m     # Guaranteed CPU allocation
+            memory: 512Mi # Guaranteed memory allocation
+          limits:
+            cpu: 1000m    # Maximum CPU usage
+            memory: 1Gi   # Maximum memory usage
+        
+        # Configuration and secrets mounting
+        envFrom:
+        - configMapRef:
+            name: saas-metrics-config
+        - secretRef:
+            name: saas-metrics-secrets
+        
+        # Health checking for high availability
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        
+        # Security context for container hardening
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+      
+      # Pod distribution strategy for high availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: saas-metrics-platform
+                  component: api
+              topologyKey: kubernetes.io/hostname
