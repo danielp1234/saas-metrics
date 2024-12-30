@@ -1,0 +1,155 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '18.x'
+  CACHE_KEY: npm-cache-${{ github.sha }}
+  NODE_ENV: test
+  CI: true
+  FORCE_COLOR: true
+
+jobs:
+  backend-ci:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/backend/package.json
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            src/backend/node_modules
+          key: ${{ env.CACHE_KEY }}-backend
+          restore-keys: |
+            npm-cache-${{ github.ref }}-backend-
+            npm-cache-backend-
+
+      - name: Install dependencies
+        working-directory: src/backend
+        run: npm ci
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Run ESLint
+        working-directory: src/backend
+        run: npm run lint
+        
+      - name: Type check
+        working-directory: src/backend
+        run: npm run typecheck
+
+      - name: Run unit tests
+        working-directory: src/backend
+        run: npm run test:coverage
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ./coverage/junit
+
+      - name: Run integration tests
+        working-directory: src/backend
+        run: npm run test:e2e
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ./coverage/junit-e2e
+
+      - name: Build application
+        working-directory: src/backend
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-dist
+          path: src/backend/dist
+          retention-days: 7
+
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-coverage
+          path: src/backend/coverage
+          retention-days: 7
+
+  frontend-ci:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/web/package.json
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            src/web/node_modules
+          key: ${{ env.CACHE_KEY }}-frontend
+          restore-keys: |
+            npm-cache-${{ github.ref }}-frontend-
+            npm-cache-frontend-
+
+      - name: Install dependencies
+        working-directory: src/web
+        run: npm ci
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Run ESLint
+        working-directory: src/web
+        run: npm run lint
+
+      - name: Type check
+        working-directory: src/web
+        run: npm run typecheck
+
+      - name: Run unit tests
+        working-directory: src/web
+        run: npm run test:coverage
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ./coverage/junit
+
+      - name: Build application
+        working-directory: src/web
+        run: npm run build
+        env:
+          VITE_APP_VERSION: ${{ github.sha }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-dist
+          path: src/web/dist
+          retention-days: 7
+
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-coverage
+          path: src/web/coverage
+          retention-days: 7
