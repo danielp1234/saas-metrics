@@ -1,0 +1,67 @@
+# Kustomize configuration for SaaS Metrics Platform staging environment
+# Version: kustomize v5.0.0
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: saas-metrics-staging
+
+# Staging namespace configuration
+namespace: saas-metrics-staging
+
+# Common labels for all resources
+commonLabels:
+  environment: staging
+  app: saas-metrics-platform
+  tier: staging
+
+# Common annotations for all resources
+commonAnnotations:
+  environment.type: staging
+  deployment.environment: staging
+  contact.team: platform-engineering
+  monitoring.enabled: "true"
+  rollback.enabled: "true"
+
+# Base resources reference
+resources:
+  - ../../base
+
+# Strategic merge patches for staging-specific configurations
+patchesStrategicMerge:
+  - ingress-patch.yaml
+  - hpa-patch.yaml
+
+# Container image configuration for staging
+images:
+  - name: saas-metrics-api
+    newName: registry.saas-platform.com/saas-metrics-api
+    newTag: staging
+  - name: saas-metrics-web
+    newName: registry.saas-platform.com/saas-metrics-web
+    newTag: staging
+
+# ConfigMap generation for staging environment
+configMapGenerator:
+  - name: saas-metrics-config
+    behavior: merge
+    literals:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=debug
+      - API_URL=https://staging.metrics.saas-platform.com/api
+      - ENABLE_MONITORING=true
+      - ENABLE_DEBUG=true
+      - CACHE_TTL=300
+      - MAX_CONNECTIONS=50
+
+# Secret generation for staging environment
+secretGenerator:
+  - name: saas-metrics-secrets
+    behavior: merge
+    envs:
+      - staging.env
+
+# Replica configuration for staging environment
+replicas:
+  - name: saas-metrics-platform
+    count: 2
