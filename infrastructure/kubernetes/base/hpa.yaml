@@ -1,0 +1,62 @@
+# HorizontalPodAutoscaler configuration for SaaS Metrics Platform
+# Version: autoscaling/v2
+# Purpose: Defines autoscaling rules to maintain system performance and availability
+# Requirements:
+# - Response time < 2 seconds for data retrieval
+# - 99.9% system uptime
+# - Horizontal scaling up to 10 replicas
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: saas-metrics-platform
+  namespace: saas-metrics
+  labels:
+    app: saas-metrics-platform
+    component: api
+spec:
+  # Target the main application deployment
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: saas-metrics-platform
+  
+  # High availability configuration
+  minReplicas: 3  # Ensures 99.9% uptime requirement
+  maxReplicas: 10 # Handles peak load conditions
+  
+  # Resource-based scaling metrics
+  metrics:
+    # CPU-based scaling
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75  # Scale at 75% CPU to maintain response time SLA
+    
+    # Memory-based scaling
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80  # Scale at 80% memory to prevent OOM issues
+  
+  # Scaling behavior configuration
+  behavior:
+    # Aggressive scale-up for responsiveness
+    scaleUp:
+      stabilizationWindowSeconds: 60  # 1-minute window for quick response
+      policies:
+        - type: Pods
+          value: 2                    # Add up to 2 pods at a time
+          periodSeconds: 60           # Every 1 minute
+    
+    # Conservative scale-down to prevent thrashing
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 5-minute window for stability
+      policies:
+        - type: Pods
+          value: 1                     # Remove 1 pod at a time
+          periodSeconds: 300           # Every 5 minutes
