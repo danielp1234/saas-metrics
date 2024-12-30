@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="48" viewBox="0 0 240 48" 
+     xmlns="http://www.w3.org/2000/svg"
+     preserveAspectRatio="xMidYMid meet"
+     role="img"
+     aria-labelledby="logoTitle logoDesc"
+     xml:lang="en">
+    
+    <!-- Accessibility elements -->
+    <title id="logoTitle">SaaS Metrics Platform</title>
+    <desc id="logoDesc">Logo of the SaaS Metrics Benchmarking Platform</desc>
+    
+    <!-- Main logo container with responsive scaling -->
+    <g transform="translate(10, 8)">
+        <!-- Metrics Icon - Stylized graph representation -->
+        <g fill="currentColor" class="logo-icon">
+            <!-- Bar chart bars -->
+            <rect x="0" y="20" width="8" height="12" rx="1"/>
+            <rect x="12" y="14" width="8" height="18" rx="1"/>
+            <rect x="24" y="8" width="8" height="24" rx="1"/>
+            
+            <!-- Trend line -->
+            <path d="M0,32 C8,28 16,24 32,16" 
+                  stroke="currentColor" 
+                  stroke-width="2" 
+                  fill="none" 
+                  stroke-linecap="round"/>
+        </g>
+        
+        <!-- Text "SaaS Metrics" -->
+        <g transform="translate(48, 24)" fill="currentColor" class="logo-text">
+            <text font-family="system-ui, -apple-system, sans-serif" 
+                  font-size="24" 
+                  font-weight="600" 
+                  letter-spacing="-0.5">
+                <tspan>SaaS</tspan>
+                <tspan x="64" dx="8">Metrics</tspan>
+            </text>
+        </g>
+        
+        <!-- Platform indicator dot -->
+        <circle cx="220" cy="24" r="4" fill="currentColor" class="logo-dot"/>
+    </g>
+    
+    <!-- Responsive styles -->
+    <style>
+        @media (max-width: 768px) {
+            .logo-text { transform: scale(0.833); }
+        }
+        @media (max-width: 480px) {
+            .logo-text { transform: scale(0.667); }
+        }
+        
+        /* Theme color integration */
+        :root {
+            color-scheme: light dark;
+        }
+        
+        .logo-icon, .logo-text, .logo-dot {
+            fill: currentColor;
+        }
+        
+        /* Optimize for high-contrast modes */
+        @media (forced-colors: active) {
+            .logo-icon, .logo-text, .logo-dot {
+                forced-color-adjust: auto;
+            }
+        }
+    </style>
+    
+    <!-- Performance optimizations -->
+    <defs>
+        <style>
+            /* Optimize paint and layout performance */
+            * {
+                transform-box: fill-box;
+                transform-origin: center;
+                will-change: transform;
+            }
+        </style>
+    </defs>
+</svg>
