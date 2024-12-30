@@ -1,0 +1,139 @@
+# Elasticsearch 7.17.0 Configuration
+# SaaS Metrics Platform - Production Configuration
+
+#------------------------------------------------------------------------------
+# Cluster Configuration
+#------------------------------------------------------------------------------
+# Unique name for the Elasticsearch cluster
+cluster.name: saas-metrics-elk
+
+# Node-specific settings
+node.name: saas-metrics-es01
+node.master: true
+node.data: true
+node.ingest: true
+
+#------------------------------------------------------------------------------
+# Memory Management
+#------------------------------------------------------------------------------
+# Lock the memory and prevent swapping
+bootstrap.memory_lock: true
+
+# JVM heap size configuration is set via environment variable ES_JAVA_OPTS="-Xms1g -Xmx1g"
+# Do not set heap size here as it should be configured at the container level
+
+#------------------------------------------------------------------------------
+# Paths Configuration
+#------------------------------------------------------------------------------
+path.data: /usr/share/elasticsearch/data
+path.logs: /usr/share/elasticsearch/logs
+
+#------------------------------------------------------------------------------
+# Network Configuration
+#------------------------------------------------------------------------------
+# Bind to all interfaces to allow container networking
+network.host: 0.0.0.0
+http.port: 9200
+transport.port: 9300
+
+# Discovery configuration for container environment
+discovery.seed_hosts: ["saas-metrics-es01", "saas-metrics-es02"]
+cluster.initial_master_nodes: ["saas-metrics-es01"]
+
+#------------------------------------------------------------------------------
+# Security Configuration
+#------------------------------------------------------------------------------
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+xpack.security.audit.enabled: true
+
+# Enable encryption for HTTP client communications
+xpack.security.http.ssl:
+  enabled: true
+  verification_mode: certificate
+
+#------------------------------------------------------------------------------
+# Monitoring Configuration
+#------------------------------------------------------------------------------
+xpack.monitoring.enabled: true
+xpack.monitoring.collection.enabled: true
+
+# Collection intervals for monitoring
+xpack.monitoring.collection.interval: 10s
+xpack.monitoring.history.duration: 7d
+
+#------------------------------------------------------------------------------
+# Performance Optimization
+#------------------------------------------------------------------------------
+# Thread pool configuration for optimal performance
+thread_pool:
+  write:
+    size: 32
+    queue_size: 1000
+  search:
+    size: 16
+    queue_size: 1000
+  get:
+    size: 16
+    queue_size: 1000
+
+# Cache settings
+indices.memory.index_buffer_size: 30%
+indices.queries.cache.size: 15%
+
+#------------------------------------------------------------------------------
+# Index Management
+#------------------------------------------------------------------------------
+# Default index settings
+action.auto_create_index: true
+action.destructive_requires_name: true
+
+# Index lifecycle management
+xpack.ilm.enabled: true
+indices.lifecycle.history_index_enabled: true
+
+#------------------------------------------------------------------------------
+# Cluster Stability & Recovery
+#------------------------------------------------------------------------------
+# Gateway configuration for cluster recovery
+gateway:
+  recover_after_nodes: 1
+  recover_after_time: 5m
+  expected_nodes: 2
+
+# Cluster stability settings
+cluster.routing.allocation.disk.threshold_enabled: true
+cluster.routing.allocation.disk.watermark.low: 85%
+cluster.routing.allocation.disk.watermark.high: 90%
+cluster.routing.allocation.disk.watermark.flood_stage: 95%
+
+#------------------------------------------------------------------------------
+# Search Performance
+#------------------------------------------------------------------------------
+search:
+  max_buckets: 10000
+  default_search_timeout: 30s
+
+# Field data circuit breaker
+indices.breaker.fielddata.limit: 40%
+indices.breaker.request.limit: 60%
+indices.breaker.total.limit: 70%
+
+#------------------------------------------------------------------------------
+# Logging Configuration
+#------------------------------------------------------------------------------
+logger:
+  level: INFO
+  action: DEBUG
+  discovery: INFO
+
+#------------------------------------------------------------------------------
+# Cross-Cluster Search (if needed in future)
+#------------------------------------------------------------------------------
+#cluster.remote.connect: false
+
+#------------------------------------------------------------------------------
+# Deprecation Warnings
+#------------------------------------------------------------------------------
+# Enable deprecation warnings in logs
+cluster.deprecation_logging.enabled: true
