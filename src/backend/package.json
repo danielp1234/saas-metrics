@@ -39,7 +39,7 @@
     "express-rate-limit": "^6.9.0",
     "express-sanitizer": "1.x",
     "express-validator": "7.x",
-    "google-auth-library": "^8.0.0",
+    "google-auth-library": "^9.15.0",
     "helmet": "^7.0.0",
     "http-errors": "^2.0.0",
     "http-status-codes": "^2.2.0",
