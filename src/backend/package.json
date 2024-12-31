@@ -54,7 +54,7 @@
     "opossum": "^6.0.0",
     "pg": "^8.11.0",
     "prom-client": "^14.0.0",
-    "rate-limit-redis": "^3.0.0",
+    "rate-limit-redis": "^4.2.0",
     "response-time": "2.3.x",
     "sanitize-html": "^2.11.0",
     "swagger-ui-express": "5.0.x",
