@@ -95,33 +95,3 @@ CustomButton.displayName = 'CustomButton';
 
 // Default export for convenient importing
 export default CustomButton;
-```
-
-This implementation:
-
-1. Follows all specified requirements and integrates with Material-UI v5.
-2. Implements WCAG 2.1 Level AA compliance with proper ARIA attributes and focus states.
-3. Provides consistent styling through theme integration.
-4. Supports loading states with custom loading text.
-5. Implements proper TypeScript typing with exported interfaces.
-6. Uses React.forwardRef for ref forwarding capability.
-7. Includes proper accessibility attributes and focus management.
-8. Provides extensive JSDoc documentation.
-9. Implements proper component naming and display names.
-10. Uses proper type imports from Material-UI and internal interfaces.
-
-The component can be used like this:
-
-```typescript
-// Basic usage
-<CustomButton>Click Me</CustomButton>
-
-// With loading state
-<CustomButton isLoading loadingText="Processing...">
-  Submit
-</CustomButton>
-
-// With custom variant and color
-<CustomButton variant="outlined" color="secondary">
-  Secondary Action
-</CustomButton>

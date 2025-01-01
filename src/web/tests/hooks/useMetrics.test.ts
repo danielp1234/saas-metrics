@@ -125,7 +125,7 @@ const setupTest = (options?: {
   });
 
   // Create wrapper with Provider
-  const wrapper: React.FC = ({ children }) => (
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
     <Provider store={store}>{children}</Provider>
   );
 

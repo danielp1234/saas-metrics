@@ -67,7 +67,7 @@ const mockTokens = {
 
 describe('useAuth hook', () => {
   let mockStore: ReturnType<typeof createMockStore>;
-  let wrapper: React.FC;
+  let wrapper: ({ children }: { children: React.ReactNode }) => JSX.Element;
 
   beforeEach(() => {
     // Reset all mocks
@@ -77,7 +77,7 @@ describe('useAuth hook', () => {
     mockStore = createMockStore();
     
     // Setup provider wrapper
-    wrapper = ({ children }: { children: React.ReactNode }) => (
+    wrapper = ({ children }) => (
       <Provider store={mockStore}>{children}</Provider>
     );
 
