@@ -133,35 +133,3 @@ const MetricHeader = memo(({ metric, onBack }: MetricHeaderProps) => {
 MetricHeader.displayName = 'MetricHeader';
 
 export default MetricHeader;
-```
-
-This implementation:
-
-1. Follows F-pattern layout with consistent 8px grid spacing using Material-UI's theme spacing
-2. Implements proper visual hierarchy with styled typography and containers
-3. Uses semantic HTML with proper ARIA labels for accessibility
-4. Includes responsive design with mobile breakpoints
-5. Implements memoization for performance optimization
-6. Provides comprehensive metadata display using Material-UI Chips
-7. Formats metric values based on type (currency, percentage, decimal)
-8. Uses the common PageHeader component for consistent navigation
-9. Follows Material-UI design patterns and theme system
-10. Includes proper TypeScript typing for all props and components
-
-The component is production-ready with:
-- Error boundary support through React.memo
-- Accessibility compliance
-- Responsive design
-- Proper type checking
-- Consistent styling with the design system
-- Clear visual hierarchy
-- Comprehensive documentation
-- Performance optimization
-
-The component can be used as follows:
-
-```typescript
-<MetricHeader
-  metric={metricData}
-  onBack={() => navigate('/metrics')}
-/>
