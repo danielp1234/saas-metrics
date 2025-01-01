@@ -131,8 +131,8 @@ export const formatMetricValue = (
       };
     default:
       return {
-        value: format(','')(value),
-        ariaLabel: `${format(','')(value)}`
+        value: format(',')(value),
+        ariaLabel: `${format(',')(value)}`
       };
   }
 };
