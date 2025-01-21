@@ -15,10 +15,7 @@ import {
 } from 'date-fns';
 
 // External imports - date-fns-tz v2.0.0
-import { 
-  utcToZonedTime, 
-  zonedTimeToUtc 
-} from 'date-fns-tz';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 // Global constants for date formatting and validation
 export const DATE_FORMAT = 'yyyy-MM-dd';
@@ -57,8 +54,8 @@ export const formatDate = (
     }
 
     const zonedDate = timezone 
-      ? utcToZonedTime(parsedDate, timezone)
-      : utcToZonedTime(parsedDate, DEFAULT_TIMEZONE);
+      ? toZonedTime(parsedDate, timezone)
+      : toZonedTime(parsedDate, DEFAULT_TIMEZONE);
 
     return format(zonedDate, formatStr || DATE_FORMAT);
   } catch (error) {
@@ -86,8 +83,8 @@ export const formatDateForDisplay = (
     }
 
     const zonedDate = timezone 
-      ? utcToZonedTime(parsedDate, timezone)
-      : utcToZonedTime(parsedDate, DEFAULT_TIMEZONE);
+      ? toZonedTime(parsedDate, timezone)
+      : toZonedTime(parsedDate, DEFAULT_TIMEZONE);
 
     const formatString = includeTime ? DISPLAY_DATETIME_FORMAT : DISPLAY_DATE_FORMAT;
     return format(zonedDate, formatString);
@@ -111,8 +108,8 @@ export const parseDate = (dateStr: string, timezone?: string): Date | null => {
     }
 
     return timezone 
-      ? utcToZonedTime(parsedDate, timezone)
-      : utcToZonedTime(parsedDate, DEFAULT_TIMEZONE);
+      ? toZonedTime(parsedDate, timezone)
+      : toZonedTime(parsedDate, DEFAULT_TIMEZONE);
   } catch (error) {
     console.error('Error parsing date:', error);
     return null;
@@ -181,8 +178,8 @@ export const getDateRange = (
     }
 
     return {
-      start: zonedTimeToUtc(start, DEFAULT_TIMEZONE),
-      end: zonedTimeToUtc(end, DEFAULT_TIMEZONE),
+      start: fromZonedTime(start, DEFAULT_TIMEZONE),
+      end: fromZonedTime(end, DEFAULT_TIMEZONE),
       days,
       isValid: true
     };
@@ -214,7 +211,7 @@ export const toUTC = (
     }
 
     const timezone = sourceTimezone || DEFAULT_TIMEZONE;
-    return zonedTimeToUtc(parsedDate, timezone);
+    return fromZonedTime(parsedDate, timezone);
   } catch (error) {
     console.error('Error converting to UTC:', error);
     return null;
